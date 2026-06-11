@@ -2,13 +2,526 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, viewport-fit=cover">
   <title>Loterial Pro · Sistema Cloud Comercial</title>
-  <!-- Firebase v9 CDN (ES Modules) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #8b5cf6;
+      --primary-light: #a78bfa;
+      --primary-dark: #6d28d9;
+      --bg-dark: #0a0e1a;
+      --bg-card-dark: #131a2e;
+      --bg-card-hover: #1a2340;
+      --text-light: #e8edf5;
+      --text-muted: #8899b4;
+      --border-dark: #1e2d4d;
+      --success: #10b981;
+      --success-light: #34d399;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --glass: rgba(19, 26, 46, 0.85);
+      --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+      --radius-xl: 1.25rem;
+      --radius-lg: 1rem;
+      --radius-md: 0.75rem;
+      --radius-sm: 0.5rem;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0a0e1a 0%, #0f172a 50%, #0a0f1f 100%);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(0.5rem, 2vw, 1.5rem);
+      background-attachment: fixed;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body.light {
+      background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f8fafc 100%);
+      color: #1a202c;
+    }
+
+    body.light::before {
+      background: radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 50%);
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 1320px;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.75rem, 2vw, 1.5rem);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Cards modernos com vidro */
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-xl);
+      padding: clamp(1rem, 3vw, 1.75rem);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-dark);
+      transition: var(--transition);
+    }
+
+    body.light .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-color: #d1d5db;
+      box-shadow: 0 15px 40px -15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card:hover {
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+    }
+
+    body.light .card:hover {
+      box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Header elegante */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      font-size: 2.2rem;
+      filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.5));
+    }
+
+    .logo-text {
+      font-weight: 800;
+      font-size: clamp(1.4rem, 4vw, 1.9rem);
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #c084fc, #8b5cf6, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+
+    .logo-sub {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 0.1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .user-pill {
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--primary-light);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 1.2rem;
+    }
+
+    /* Botões elegantes */
+    .btn {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      color: white;
+      padding: 0.65rem 1.4rem;
+      border-radius: 2.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.45);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--primary);
+      color: var(--primary-light);
+      box-shadow: none;
+    }
+
+    .btn-outline:hover {
+      background: rgba(139, 92, 246, 0.1);
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success), #059669);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger), #dc2626);
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    /* Tabs modernas */
+    .tab-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.4rem;
+      border-radius: 3rem;
+      width: fit-content;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    body.light .tab-nav {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .tab-nav button {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.55rem 1.2rem;
+      border-radius: 2.5rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .tab-nav button.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    }
+
+    .tab-nav button:hover:not(.active) {
+      color: var(--text-light);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeSlide 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Grid responsivo */
+    .grid-responsive {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+      gap: clamp(0.75rem, 2vw, 1.25rem);
+    }
+
+    /* Inputs modernos */
+    .input-group {
+      margin-bottom: 0.8rem;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input, textarea, select {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1.5px solid var(--border-dark);
+      border-radius: var(--radius-md);
+      padding: 0.7rem 1rem;
+      color: var(--text-light);
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      backdrop-filter: blur(5px);
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    }
+
+    body.light input, body.light textarea, body.light select {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: #cbd5e1;
+      color: #1a202c;
+    }
+
+    /* Dezenas estilizadas */
+    .dezena-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: clamp(1.8rem, 5vw, 2.4rem);
+      height: clamp(1.8rem, 5vw, 2.4rem);
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e293b, #334155);
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin: 0.15rem;
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      transition: var(--transition);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .dezena-circle:hover {
+      transform: scale(1.08);
+      background: var(--primary);
+      border-color: var(--primary-light);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 1.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      margin: 0.15rem;
+    }
+
+    .badge-otimo { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+    .badge-bom { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+    .badge-regular { background: linear-gradient(135deg, #f59e0b, #d97706); color: #1a202c; }
+    .badge-ruim { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+
+    /* Tabela moderna */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-dark);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th {
+      background: rgba(139, 92, 246, 0.15);
+      padding: 0.8rem 1rem;
+      text-align: left;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.75rem;
+      color: var(--primary-light);
+    }
+
+    td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Seção de resultados */
+    .result-card {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      margin-top: 0.75rem;
+      border: 1px solid var(--border-dark);
+    }
+
+    .score-highlight {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #f59e0b, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-dark);
+      border-radius: 3px;
+    }
+
+    /* Responsividade mobile */
+    @media (max-width: 768px) {
+      .header-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .tab-nav {
+        width: 100%;
+        justify-content: flex-start;
+        border-radius: 1.5rem;
+      }
+
+      .tab-nav button {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.78rem;
+      }
+
+      .btn {
+        padding: 0.55rem 1.1rem;
+        font-size: 0.82rem;
+      }
+
+      .card {
+        padding: 1rem;
+      }
+
+      .dezena-circle {
+        width: 1.6rem;
+        height: 1.6rem;
+        font-size: 0.7rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0.3rem;
+      }
+
+      .tab-nav {
+        gap: 0.2rem;
+        padding: 0.3rem;
+      }
+
+      .tab-nav button {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.7rem;
+      }
+
+      .grid-responsive {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      .print-area, .print-area * { visibility: visible; }
+      .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container" id="appRoot">
+    <div id="authUI"></div>
+    <div id="mainUI" style="display: none;"></div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, getDocs, collection, updateDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, getDocs, collection, updateDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCkU-ZK-QOJSKq501qaArudk3IFGAQZvUU",
@@ -23,289 +536,59 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    window.firebaseApp = app;
-    window.auth = auth;
-    window.db = db;
-    window.firebaseReady = true;
-  </script>
+    console.log("🔥 Loterial Pro · Firebase inicializado");
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    :root {
-      --primary: #8b5cf6;
-      --primary-hover: #7c3aed;
-      --bg-dark: #0f172a;
-      --bg-card-dark: #1e293b;
-      --bg-card-light: #ffffff;
-      --text-dark: #0f172a;
-      --text-light: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --info: #3b82f6;
-      --border-light: #e2e8f0;
-      --border-dark: #334155;
-      --shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
-      --radius-lg: 1.5rem;
-      --radius-md: 1rem;
-      --radius-sm: 0.75rem;
-      --transition: 0.2s ease;
-    }
-
-    body {
-      background: var(--bg-dark);
-      color: var(--text-light);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-
-    /* light theme overrides */
-    body.light {
-      background: #f1f5f9;
-      color: var(--text-dark);
-    }
-    body.light .card, body.light .tab-content, body.light .modal-content {
-      background: var(--bg-card-light);
-      border-color: var(--border-light);
-      color: var(--text-dark);
-    }
-    body.light .tab-nav button {
-      color: #475569;
-    }
-    body.light .tab-nav button.active {
-      background: var(--primary);
-      color: white;
-    }
-    body.light input, body.light textarea, body.light select {
-      background: white;
-      border-color: #cbd5e1;
-      color: #0f172a;
-    }
-
-    .app-container {
-      width: 100%;
-      max-width: 1300px;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .card {
-      background: var(--bg-card-dark);
-      backdrop-filter: blur(12px);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem 1.8rem;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border-dark);
-    }
-
-    .header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .logo {
-      font-weight: 700;
-      font-size: 1.8rem;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #c084fc, #8b5cf6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .theme-toggle {
-      background: transparent;
-      border: 1px solid var(--border-dark);
-      color: var(--text-light);
-      padding: 0.5rem 1rem;
-      border-radius: 2rem;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    body.light .theme-toggle {
-      border-color: #cbd5e1;
-      color: #1e293b;
-    }
-
-    .auth-lock {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(20px);
-      background: rgba(15, 23, 42, 0.8);
-      border-radius: 2rem;
-      padding: 2.5rem;
-      width: 100%;
-      max-width: 450px;
-      margin: 2rem auto;
-    }
-
-    .tab-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .tab-nav button {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border-dark);
-      color: #cbd5e1;
-      padding: 0.6rem 1.2rem;
-      border-radius: 2rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .tab-nav button.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-      box-shadow: 0 4px 12px rgba(139,92,246,0.4);
-    }
-
-    .tab-content {
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-    }
-
-    .grid-2col {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-
-    input, textarea, select {
-      background: #0f172a;
-      border: 1px solid var(--border-dark);
-      border-radius: var(--radius-sm);
-      padding: 0.7rem 1rem;
-      color: white;
-      width: 100%;
-      margin-top: 0.3rem;
-    }
-
-    .btn {
-      background: var(--primary);
-      border: none;
-      color: white;
-      padding: 0.7rem 1.5rem;
-      border-radius: 2rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--primary);
-      color: var(--primary);
-    }
-    .btn-danger {
-      background: var(--danger);
-    }
-    .btn-success {
-      background: var(--success);
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 0.3rem 0.9rem;
-      border-radius: 1rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .badge-otimo { background: #10b981; color: white; }
-    .badge-bom { background: #3b82f6; color: white; }
-    .badge-regular { background: #f59e0b; color: black; }
-    .badge-ruim { background: #ef4444; color: white; }
-
-    .dezena-circle {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 2.2rem;
-      height: 2.2rem;
-      border-radius: 50%;
-      background: #334155;
-      font-weight: 700;
-      margin: 0.15rem;
-    }
-
-    @media print {
-      body * { visibility: hidden; }
-      .print-area, .print-area * { visibility: visible; }
-      .print-area { position: absolute; left: 0; top: 0; width: 100%; }
-    }
-  </style>
-</head>
-<body class="dark">
-<div class="app-container" id="appRoot">
-  <div id="authUI"></div>
-  <div id="mainUI" style="display: none;"></div>
-</div>
-
-<script type="module">
-  window.addEventListener('load', () => {
-    if (!window.firebaseReady) {
-      alert("Firebase não carregou.");
-      return;
-    }
-    const auth = window.auth;
-    const db = window.db;
-
-    // Estados globais
-    let currentUser = null;
-    let isAdmin = false;
-    let userDocData = null;
-    let allConcursosCache = [];
-
-    // Mapeamento de abas
     const appRoot = document.getElementById('appRoot');
     const authUI = document.getElementById('authUI');
     const mainUI = document.getElementById('mainUI');
 
+    let currentUser = null;
+    let isAdmin = false;
+    let userDocData = null;
+    let allConcursosCache = [];
+    let jogosGeradosAtuais = [];
+
+    // ==================== AUTENTICAÇÃO ====================
     function renderAuth() {
       authUI.innerHTML = `
-        <div class="auth-lock card">
-          <div style="font-size:2rem; margin-bottom:1rem;">🎲</div>
-          <h2 style="margin-bottom:1.5rem;">Loterial Pro</h2>
-          <div id="authForm" style="width:100%">
-            <input type="email" id="authEmail" placeholder="Email" autocomplete="email" style="margin-bottom:0.8rem;">
-            <input type="password" id="authSenha" placeholder="Senha" autocomplete="current-password" style="margin-bottom:1rem;">
-            <div style="display:flex; gap:0.8rem;">
-              <button class="btn" id="btnLogin">Entrar</button>
-              <button class="btn btn-outline" id="btnCadastrar">Criar Conta</button>
+        <div style="display:flex; align-items:center; justify-content:center; min-height:70vh;">
+          <div class="card" style="max-width:420px; width:100%; text-align:center; padding:2.5rem 2rem;">
+            <div style="font-size:3.5rem; margin-bottom:0.5rem; filter:drop-shadow(0 0 20px rgba(139,92,246,0.6));">🎱</div>
+            <div class="logo-text" style="font-size:2rem; margin-bottom:0.2rem;">Loterial Pro</div>
+            <div class="logo-sub" style="margin-bottom:2rem;">Sistema Cloud Comercial</div>
+            <div id="authForm" style="width:100%; text-align:left;">
+              <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="authEmail" placeholder="seu@email.com" autocomplete="email">
+              </div>
+              <div class="input-group">
+                <label>Senha</label>
+                <input type="password" id="authSenha" placeholder="••••••••" autocomplete="current-password">
+              </div>
+              <div style="display:flex; gap:0.6rem; margin-top:1.2rem;">
+                <button class="btn" id="btnLogin" style="flex:1;">🔐 Entrar</button>
+                <button class="btn btn-outline" id="btnCadastrar" style="flex:1;">✨ Criar Conta</button>
+              </div>
             </div>
           </div>
         </div>
       `;
-      document.getElementById('btnLogin').addEventListener('click', () => {
+
+      document.getElementById('btnLogin').addEventListener('click', async () => {
         const email = document.getElementById('authEmail').value.trim();
         const senha = document.getElementById('authSenha').value;
-        signInWithEmailAndPassword(auth, email, senha).catch(e => alert(e.message));
+        if (!email || !senha) return alert("Preencha todos os campos.");
+        try {
+          await signInWithEmailAndPassword(auth, email, senha);
+        } catch (e) {
+          alert('❌ ' + e.message);
+        }
       });
+
       document.getElementById('btnCadastrar').addEventListener('click', async () => {
         const email = document.getElementById('authEmail').value.trim();
         const senha = document.getElementById('authSenha').value;
+        if (!email || !senha) return alert("Preencha todos os campos.");
         try {
           const cred = await createUserWithEmailAndPassword(auth, email, senha);
           await setDoc(doc(db, "usuarios", cred.user.uid), {
@@ -314,93 +597,122 @@
             data_cadastro: new Date(),
             dias_trial: 7
           });
-          alert("Conta criada! Trial de 7 dias ativado.");
-        } catch (e) { alert(e.message); }
+          alert("✅ Conta criada! Trial de 7 dias ativado.");
+        } catch (e) {
+          alert('❌ ' + e.message);
+        }
       });
     }
 
-    function verificarAcesso(user) {
+    // ==================== VERIFICAÇÃO DE ACESSO ====================
+    async function verificarAcesso(user) {
       if (!user) {
         mainUI.style.display = 'none';
         authUI.style.display = 'block';
         renderAuth();
         return;
       }
+
       authUI.style.display = 'none';
       mainUI.style.display = 'block';
+      currentUser = user;
 
-      const adminCheck = async () => {
-        try {
-          await getDocs(collection(db, "usuarios"));
-          isAdmin = true;
-        } catch (e) {
-          isAdmin = false;
-        }
-        if (isAdmin) {
-          userDocData = { status_licenca: "ativo" };
-          construirInterface();
-          return;
-        }
+      try {
+        await getDocs(collection(db, "usuarios"));
+        isAdmin = true;
+        userDocData = { status_licenca: "ativo" };
+        console.log("👑 Admin identificado");
+        construirInterface();
+        return;
+      } catch (e) {
+        isAdmin = false;
+      }
+
+      try {
         const userDoc = await getDoc(doc(db, "usuarios", user.uid));
         if (!userDoc.exists()) {
+          alert("Documento não encontrado. Contate o suporte.");
           await signOut(auth);
           return;
         }
         userDocData = userDoc.data();
+
         if (userDocData.status_licenca === "ativo") {
           construirInterface();
         } else if (userDocData.status_licenca === "pendente") {
           const agora = new Date();
-          const criacao = userDocData.data_cadastro?.toDate ? userDocData.data_cadastro.toDate() : new Date(userDocData.data_cadastro);
-          const diffDias = Math.floor((agora - criacao) / (1000*60*60*24));
+          let criacao = userDocData.data_cadastro?.toDate ? userDocData.data_cadastro.toDate() : new Date(userDocData.data_cadastro);
+          const diffDias = Math.floor((agora - criacao) / (1000 * 60 * 60 * 24));
           const restantes = 7 - diffDias;
           if (restantes > 0) {
-            alert(`Trial ativo · ${restantes} dia(s) restante(s).`);
+            alert(`⏳ Trial ativo · ${restantes} dia(s) restante(s).`);
             construirInterface();
           } else {
-            alert("Trial expirado. Contate o administrador.");
+            alert("⛔ Trial expirado. Contate o administrador.");
             await signOut(auth);
           }
-        } else {
+        } else if (userDocData.status_licenca === "bloqueado") {
+          alert("🚫 Licença bloqueada.");
           await signOut(auth);
         }
-      };
-      adminCheck();
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao verificar acesso.");
+        await signOut(auth);
+      }
     }
 
     onAuthStateChanged(auth, (user) => {
-      currentUser = user;
+      console.log("Auth state:", user?.email || "Nenhum");
       verificarAcesso(user);
     });
 
+    // ==================== INTERFACE PRINCIPAL ====================
     function construirInterface() {
       mainUI.innerHTML = `
         <div class="card header-row">
-          <span class="logo">Loterial Pro</span>
-          <div style="display:flex; gap:1rem; align-items:center;">
-            <button class="theme-toggle" id="themeToggle">🌓 Tema</button>
-            <span>${currentUser?.email || ''}</span>
-            <button class="btn btn-outline" id="btnLogout">Sair</button>
+          <div class="logo-container">
+            <span class="logo-icon">🎱</span>
+            <div>
+              <div class="logo-text">Loterial Pro</div>
+              <div class="logo-sub">Sistema Cloud Comercial</div>
+            </div>
+          </div>
+          <div class="header-actions">
+            <span class="user-pill">👤 ${currentUser?.email || ''}</span>
+            <button class="btn btn-icon btn-outline" id="themeToggle" title="Alternar tema">🌓</button>
+            <button class="btn btn-outline btn-sm" id="btnLogout">🚪 Sair</button>
           </div>
         </div>
         <div class="tab-nav" id="tabNav"></div>
-        <div id="tabContentContainer" class="card"></div>
+        <div id="tabContentContainer" class="card" style="min-height: 50vh;"></div>
       `;
+
       document.getElementById('themeToggle').addEventListener('click', () => {
         document.body.classList.toggle('light');
       });
-      document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
+
+      document.getElementById('btnLogout').addEventListener('click', async () => {
+        await signOut(auth);
+      });
 
       const tabs = [];
-      if (isAdmin) tabs.push({ id: 'licencas', label: 'Licenças Admin' });
-      if (isAdmin) tabs.push({ id: 'concursos', label: 'Concursos' });
-      tabs.push({ id: 'gerador', label: 'Gerador' });
-      tabs.push({ id: 'avaliador', label: 'Avaliador' });
-      tabs.push({ id: 'conferidor', label: 'Conferidor' });
+      if (isAdmin) {
+        tabs.push({ id: 'licencas', label: '🛡️ Licenças' });
+        tabs.push({ id: 'concursos', label: '📋 Concursos' });
+      }
+      tabs.push({ id: 'gerador', label: '🎲 Gerador' });
+      tabs.push({ id: 'avaliador', label: '📊 Avaliador' });
+      tabs.push({ id: 'conferidor', label: '🔍 Conferidor' });
 
       const nav = document.getElementById('tabNav');
-      nav.innerHTML = tabs.map((t, i) => `<button class="${i===0?'active':''}" data-tab="${t.id}">${t.label}</button>`).join('');
-      document.getElementById('tabContentContainer').innerHTML = tabs.map(t => `<div class="tab-content ${t.id==='gerador'?'active':''}" id="tab-${t.id}"></div>`).join('');
+      nav.innerHTML = tabs.map((t, i) =>
+        `<button class="${i === 0 ? 'active' : ''}" data-tab="${t.id}">${t.label}</button>`
+      ).join('');
+
+      document.getElementById('tabContentContainer').innerHTML = tabs.map(t =>
+        `<div class="tab-content ${t.id === (isAdmin ? 'licencas' : 'gerador') ? 'active' : ''}" id="tab-${t.id}"></div>`
+      ).join('');
 
       document.querySelectorAll('.tab-nav button').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -409,128 +721,331 @@
           const id = e.target.dataset.tab;
           document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
           document.getElementById(`tab-${id}`).classList.add('active');
-          if (id === 'licencas') renderLicencas();
-          if (id === 'concursos') renderConcursos();
-          if (id === 'gerador') renderGerador();
-          if (id === 'avaliador') renderAvaliador();
-          if (id === 'conferidor') renderConferidor();
+          carregarAba(id);
         });
       });
-      renderGerador();
+
+      carregarAba(isAdmin ? 'licencas' : 'gerador');
     }
 
+    function carregarAba(id) {
+      switch(id) {
+        case 'licencas': renderLicencas(); break;
+        case 'concursos': renderConcursos(); break;
+        case 'gerador': renderGerador(); break;
+        case 'avaliador': renderAvaliador(); break;
+        case 'conferidor': renderConferidor(); break;
+      }
+    }
+
+    // ==================== ABA LICENÇAS ====================
     async function renderLicencas() {
       const container = document.getElementById('tab-licencas');
-      container.innerHTML = '<p>Carregando licenças...</p>';
-      const snap = await getDocs(collection(db, "usuarios"));
-      const users = [];
-      snap.forEach(d => users.push({ id: d.id, ...d.data() }));
-      container.innerHTML = `<h3>Gerenciar Licenças</h3><table style="width:100%; border-collapse:collapse;">${users.map(u => `
-        <tr style="border-bottom:1px solid #334155;">
-          <td>${u.email}</td><td>${u.status_licenca}</td>
-          <td><button class="btn btn-success btn-sm ativar" data-id="${u.id}">Ativar</button>
-          <button class="btn btn-danger btn-sm bloquear" data-id="${u.id}">Bloquear</button></td>
-        </tr>`).join('')}</table>`;
-      container.querySelectorAll('.ativar').forEach(b => b.addEventListener('click', async (e) => {
-        await updateDoc(doc(db, "usuarios", e.target.dataset.id), { status_licenca: "ativo" });
-        renderLicencas();
-      }));
-      container.querySelectorAll('.bloquear').forEach(b => b.addEventListener('click', async (e) => {
-        await updateDoc(doc(db, "usuarios", e.target.dataset.id), { status_licenca: "bloqueado" });
-        renderLicencas();
-      }));
+      container.innerHTML = '<p style="text-align:center; padding:2rem;">⏳ Carregando licenças...</p>';
+      try {
+        const snap = await getDocs(collection(db, "usuarios"));
+        const users = [];
+        snap.forEach(d => users.push({ id: d.id, ...d.data() }));
+        container.innerHTML = `
+          <h3 style="margin-bottom:1rem;">🛡️ Gerenciar Licenças</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Email</th><th>Status</th><th style="text-align:center;">Ações</th></tr></thead>
+              <tbody>
+                ${users.map(u => `
+                  <tr>
+                    <td>${u.email}</td>
+                    <td><span style="text-transform:uppercase; font-weight:600; color:${u.status_licenca==='ativo'?'#10b981':'#f59e0b'};">${u.status_licenca}</span></td>
+                    <td style="text-align:center;">
+                      <button class="btn btn-success btn-sm ativar" data-id="${u.id}">✅ Ativar</button>
+                      <button class="btn btn-danger btn-sm bloquear" data-id="${u.id}">🚫 Bloquear</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        container.querySelectorAll('.ativar').forEach(b => b.addEventListener('click', async (e) => {
+          await updateDoc(doc(db, "usuarios", e.target.dataset.id), { status_licenca: "ativo" });
+          renderLicencas();
+        }));
+        container.querySelectorAll('.bloquear').forEach(b => b.addEventListener('click', async (e) => {
+          await updateDoc(doc(db, "usuarios", e.target.dataset.id), { status_licenca: "bloqueado" });
+          renderLicencas();
+        }));
+      } catch (e) {
+        container.innerHTML = '<p>❌ Erro ao carregar licenças.</p>';
+      }
     }
 
+    // ==================== ABA CONCURSOS ====================
     async function carregarConcursos() {
-      const q = query(collection(db, "concursos"), orderBy("numero", "desc"), limit(50));
-      const snap = await getDocs(q);
-      allConcursosCache = [];
-      snap.forEach(d => allConcursosCache.push(d.data()));
+      try {
+        const q = query(collection(db, "concursos"), orderBy("numero", "desc"), limit(50));
+        const snap = await getDocs(q);
+        allConcursosCache = [];
+        snap.forEach(d => allConcursosCache.push(d.data()));
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     async function renderConcursos() {
       await carregarConcursos();
       const container = document.getElementById('tab-concursos');
       container.innerHTML = `
-        <div class="grid-2col">
-          <div><h3>Cadastrar Concurso</h3>
-            <input id="numConcurso" placeholder="Número"><br>
-            <input id="dataConcurso" type="date"><br>
-            <input id="dezenasConcurso" placeholder="15 dezenas (ex: 01,02,03...)"><br>
-            <button class="btn" id="salvarConcurso">Salvar</button>
+        <h3 style="margin-bottom:1rem;">📋 Cadastrar Novo Concurso</h3>
+        <div class="grid-responsive">
+          <div>
+            <div class="input-group"><label>Número do Concurso</label><input id="numConcurso" placeholder="Ex: 3000"></div>
+            <div class="input-group"><label>Data</label><input id="dataConcurso" type="date"></div>
+            <div class="input-group"><label>15 Dezenas (separadas por vírgula)</label><input id="dezenasConcurso" placeholder="01,02,03,04,05,06,07,08,09,10,11,12,13,14,15"></div>
+            <button class="btn" id="salvarConcurso">💾 Salvar Concurso</button>
           </div>
-          <div><h4>Últimos 5</h4><div id="ultimosConcursos"></div></div>
-        </div>`;
+          <div>
+            <h4 style="margin-bottom:0.5rem;">📌 Últimos 5 Concursos</h4>
+            <div id="ultimosConcursos" style="max-height:300px; overflow-y:auto;">
+              ${allConcursosCache.slice(0,5).map(c => `<div class="result-card"><strong>#${c.numero}</strong><br>${c.dezenas?.join(', ') || 'N/A'}</div>`).join('') || '<p>Nenhum concurso.</p>'}
+            </div>
+          </div>
+        </div>
+      `;
+
       document.getElementById('salvarConcurso').addEventListener('click', async () => {
         const num = document.getElementById('numConcurso').value.trim();
         const data = document.getElementById('dataConcurso').value;
         const dezenasStr = document.getElementById('dezenasConcurso').value;
+        if (!num || !data || !dezenasStr) return alert("Preencha todos os campos.");
         let dezenas = dezenasStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
         if (dezenas.length !== 15) return alert("Exatamente 15 dezenas.");
-        dezenas.sort((a,b)=>a-b);
+        dezenas.sort((a, b) => a - b);
         const moldura = [1,2,3,4,5,6,10,11,15,16,20,21,22,23,24,25];
         const qtdMol = dezenas.filter(d => moldura.includes(d)).length;
-        const impares = dezenas.filter(d => d%2!==0).length;
-        await setDoc(doc(db, "concursos", num), {
-          numero: num, data, dezenas, moldura: qtdMol, impares, pares: 15-impares
-        });
-        alert("Concurso salvo!");
-        renderConcursos();
-      });
-      const ultimos = allConcursosCache.slice(0,5);
-      document.getElementById('ultimosConcursos').innerHTML = ultimos.map(c => `<p>${c.numero}: ${c.dezenas?.join(',')}</p>`).join('');
-    }
-
-    function renderGerador() {
-      document.getElementById('tab-gerador').innerHTML = `
-        <h3>Motor Combinatório</h3>
-        <select id="estrategiaGerador">
-          <option value="1">Matriz Personalizada</option><option value="2">Moldura/Miolo</option><option value="3">Quadrantes</option>
-          <option value="4">Fechamento R4</option><option value="5">Desdobramento R5</option><option value="6">Fechamento R6</option>
-          <option value="7">5 Fixas + 5 Grupos</option><option value="8">5 Grupos de 5</option>
-          <option value="9">8 Fixas + 10 Var</option><option value="10">9 Fixas + 8 Var</option><option value="11">ABC Ciclo</option>
-        </select>
-        <select id="qtdNumeros">${[15,16,17,18].map(n=>`<option value="${n}">${n} números</option>`).join('')}</select>
-        <select id="filtroImpares"><option value="">Sem filtro</option><option>8x7</option><option>9x6</option></select>
-        <button class="btn" id="gerarJogos">Gerar Jogos</button>
-        <div id="jogosGerados" style="margin:1rem 0;"></div>
-        <div><button class="btn" id="avaliarLote">Avaliar Todos</button>
-        <button class="btn" id="enviarConferidor">Enviar ao Conferidor</button>
-        <button class="btn" id="baixarExcel">Baixar CSV</button>
-        <button class="btn" id="imprimirLista">Imprimir</button></div>`;
-      document.getElementById('gerarJogos').addEventListener('click', gerarCombinacoes);
-    }
-
-    function gerarCombinacoes() {
-      const qtd = parseInt(document.getElementById('qtdNumeros').value);
-      const jogos = [];
-      for (let k=0; k<10; k++) {
-        let tentativa = 0;
-        let jogo = [];
-        while (jogo.length < qtd && tentativa < 4000) {
-          const n = Math.floor(Math.random()*25)+1;
-          if (!jogo.includes(n)) jogo.push(n);
-          tentativa++;
+        const impares = dezenas.filter(d => d % 2 !== 0).length;
+        try {
+          await setDoc(doc(db, "concursos", num), {
+            numero: num, data, dezenas, moldura: qtdMol, impares, pares: 15 - impares
+          });
+          alert("✅ Concurso salvo!");
+          renderConcursos();
+        } catch (e) {
+          alert("❌ " + e.message);
         }
-        jogo.sort((a,b)=>a-b);
-        jogos.push(jogo);
-      }
-      document.getElementById('jogosGerados').innerHTML = jogos.map(j => `<div>${j.map(d=>`<span class="dezena-circle">${d}</span>`).join('')}</div>`).join('');
+      });
     }
 
+    // ==================== ABA GERADOR ====================
+    function renderGerador() {
+      const container = document.getElementById('tab-gerador');
+      container.innerHTML = `
+        <h3 style="margin-bottom:1rem;">🎲 Motor Combinatório</h3>
+        <div class="grid-responsive" style="margin-bottom:1rem;">
+          <div class="input-group"><label>Estratégia</label>
+            <select id="estrategiaGerador">
+              <option value="1">Matriz Personalizada</option><option value="2">Moldura/Miolo</option>
+              <option value="3">Quadrantes</option><option value="4">Fechamento R4</option>
+              <option value="5">Desdobramento R5</option><option value="6">Fechamento R6</option>
+              <option value="7">5 Fixas + 5 Grupos</option><option value="8">5 Grupos de 5</option>
+              <option value="9">8 Fixas + 10 Var</option><option value="10">9 Fixas + 8 Var</option>
+              <option value="11">ABC Ciclo</option>
+            </select>
+          </div>
+          <div class="input-group"><label>Qtd. Números</label>
+            <select id="qtdNumeros">${[15,16,17,18].map(n=>`<option value="${n}">${n} números</option>`).join('')}</select>
+          </div>
+          <div class="input-group"><label>Filtro Ímpares/Pares</label>
+            <select id="filtroImpares"><option value="">Sem filtro</option><option value="8x7">8x7</option><option value="9x6">9x6</option></select>
+          </div>
+        </div>
+        <button class="btn" id="gerarJogos">⚡ Gerar Jogos</button>
+        <div id="jogosGerados" style="margin:1rem 0; max-height:350px; overflow-y:auto; display:flex; flex-wrap:wrap; gap:0.3rem;"></div>
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+          <button class="btn btn-outline btn-sm" id="avaliarLote">📊 Avaliar</button>
+          <button class="btn btn-outline btn-sm" id="enviarConferidor">🔍 Conferir</button>
+          <button class="btn btn-outline btn-sm" id="baixarExcel">📥 CSV</button>
+          <button class="btn btn-outline btn-sm" id="imprimirLista">🖨️ Imprimir</button>
+        </div>
+      `;
+
+      document.getElementById('gerarJogos').addEventListener('click', () => {
+        const qtd = parseInt(document.getElementById('qtdNumeros').value);
+        const filtro = document.getElementById('filtroImpares').value;
+        jogosGeradosAtuais = [];
+
+        for (let k = 0; k < 12; k++) {
+          let jogo = [];
+          let tentativas = 0;
+          while (jogo.length < qtd && tentativas < 4000) {
+            const n = Math.floor(Math.random() * 25) + 1;
+            if (!jogo.includes(n)) jogo.push(n);
+            tentativas++;
+          }
+          jogo.sort((a, b) => a - b);
+
+          if (filtro === '8x7' && jogo.filter(n => n % 2 !== 0).length !== 8) continue;
+          if (filtro === '9x6' && jogo.filter(n => n % 2 !== 0).length !== 9) continue;
+          jogosGeradosAtuais.push(jogo);
+        }
+
+        document.getElementById('jogosGerados').innerHTML = jogosGeradosAtuais.map(j =>
+          `<div>${j.map(d => `<span class="dezena-circle">${String(d).padStart(2,'0')}</span>`).join('')}</div>`
+        ).join('');
+      });
+
+      document.getElementById('avaliarLote').addEventListener('click', () => navegarPara('avaliador', 'jogosAvaliar'));
+      document.getElementById('enviarConferidor').addEventListener('click', () => navegarPara('conferidor', 'jogosConferir'));
+      document.getElementById('baixarExcel').addEventListener('click', baixarCSV);
+      document.getElementById('imprimirLista').addEventListener('click', imprimirJogos);
+    }
+
+    function navegarPara(tabId, textareaId) {
+      if (jogosGeradosAtuais.length === 0) return alert("Gere jogos primeiro.");
+      document.querySelectorAll('.tab-nav button').forEach(b => b.classList.remove('active'));
+      const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
+      if (tabBtn) tabBtn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      const tabContent = document.getElementById(`tab-${tabId}`);
+      if (tabContent) tabContent.classList.add('active');
+      carregarAba(tabId);
+      setTimeout(() => {
+        const textarea = document.getElementById(textareaId);
+        if (textarea) textarea.value = jogosGeradosAtuais.map(j => j.join(',')).join('\n');
+      }, 300);
+    }
+
+    function baixarCSV() {
+      if (jogosGeradosAtuais.length === 0) return alert("Gere jogos primeiro.");
+      let csv = '\ufeff' + jogosGeradosAtuais.map(j => j.join(';')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'loterial_jogos.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function imprimirJogos() {
+      if (jogosGeradosAtuais.length === 0) return alert("Gere jogos primeiro.");
+      const win = window.open('', '_blank', 'width=800,height=600');
+      win.document.write(`
+        <html><head><title>Jogos Loterial Pro</title>
+        <style>body{font-family:Arial;padding:20px;}.jogo{margin-bottom:12px;}.dz{display:inline-block;width:34px;height:34px;border-radius:50%;border:2px solid #000;text-align:center;line-height:34px;margin:2px;font-weight:700;font-size:13px;}@media print{.dz{border-color:#000;}}</style>
+        </head><body><h2>🎱 Jogos Loterial Pro</h2>${jogosGeradosAtuais.map(j => `<div class="jogo">${j.map(d => `<span class="dz">${String(d).padStart(2,'0')}</span>`).join('')}</div>`).join('')}</body></html>
+      `);
+      win.document.close();
+      win.focus();
+      win.print();
+      win.close();
+    }
+
+    // ==================== ABA AVALIADOR ====================
     function renderAvaliador() {
-      document.getElementById('tab-avaliador').innerHTML = `<h3>Avaliador Inteligente</h3><textarea id="jogosAvaliar" placeholder="Cole jogos, um por linha"></textarea><button class="btn" id="executarAvaliacao">Avaliar</button><div id="resultadoAvaliacao"></div>`;
-    }
-    function renderConferidor() {
-      document.getElementById('tab-conferidor').innerHTML = `<h3>Conferidor Avançado</h3><input id="resultadoOficial" placeholder="Resultado (15 nums)"><textarea id="jogosConferir"></textarea><button class="btn" id="conferirBtn">Conferir</button><div id="resumoConferencia"></div>`;
+      const container = document.getElementById('tab-avaliador');
+      container.innerHTML = `
+        <h3 style="margin-bottom:1rem;">📊 Avaliador Inteligente</h3>
+        <div class="input-group"><label>Jogos (um por linha)</label><textarea id="jogosAvaliar" rows="5" placeholder="01,02,03,..."></textarea></div>
+        <button class="btn" id="executarAvaliacao">🔬 Analisar Jogos</button>
+        <div id="resultadoAvaliacao" style="margin-top:1rem;"></div>
+      `;
+
+      document.getElementById('executarAvaliacao').addEventListener('click', async () => {
+        const texto = document.getElementById('jogosAvaliar').value.trim();
+        if (!texto) return alert("Insira jogos.");
+        const linhas = texto.split('\n').filter(l => l.trim());
+        const jogos = linhas.map(l => l.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)));
+        await carregarConcursos();
+        const ultimo = allConcursosCache.length > 0 ? allConcursosCache[0] : null;
+
+        let html = '';
+        jogos.forEach((jogo, idx) => {
+          const imp = jogo.filter(n => n % 2 !== 0).length;
+          const par = jogo.length - imp;
+          const moldura = [1,2,3,4,5,6,10,11,15,16,20,21,22,23,24,25];
+          const qtdMol = jogo.filter(d => moldura.includes(d)).length;
+          const soma = jogo.reduce((a,b) => a+b, 0);
+          let rep = 0;
+          if (ultimo?.dezenas) rep = jogo.filter(n => ultimo.dezenas.includes(n)).length;
+
+          const avImp = imp === 8 ? 'otimo' : (imp >= 7 && imp <= 9 ? 'bom' : 'regular');
+          const avMol = qtdMol >= 9 && qtdMol <= 11 ? 'otimo' : (qtdMol >= 8 && qtdMol <= 12 ? 'bom' : 'regular');
+          const avSoma = soma >= 166 && soma <= 220 ? 'otimo' : (soma >= 150 && soma <= 235 ? 'bom' : 'regular');
+
+          html += `<div class="result-card">
+            <strong>🎯 Jogo ${idx+1}:</strong> ${jogo.join(', ')}<br>
+            <span class="badge badge-${avImp}">Ímpares: ${imp}x${par}</span>
+            <span class="badge badge-${avMol}">Moldura: ${qtdMol}</span>
+            <span class="badge badge-${avSoma}">Soma: ${soma}</span>
+            <span class="badge badge-bom">Repetidas: ${rep}</span>
+          </div>`;
+        });
+        document.getElementById('resultadoAvaliacao').innerHTML = html || '<p>Nenhum jogo analisado.</p>';
+      });
     }
 
-    window.renderGerador = renderGerador;
-    window.renderAvaliador = renderAvaliador;
-    window.renderConferidor = renderConferidor;
-    window.renderLicencas = renderLicencas;
-    window.renderConcursos = renderConcursos;
-  });
-</script>
+    // ==================== ABA CONFERIDOR ====================
+    function renderConferidor() {
+      const container = document.getElementById('tab-conferidor');
+      container.innerHTML = `
+        <h3 style="margin-bottom:1rem;">🔍 Conferidor Avançado</h3>
+        <div class="grid-responsive">
+          <div class="input-group"><label>Resultado Oficial (15 dezenas)</label><input id="resultadoOficial" placeholder="01,02,03,...,15"></div>
+          <div class="input-group"><label>Jogos para Conferir</label><textarea id="jogosConferir" rows="4" placeholder="Um jogo por linha"></textarea></div>
+        </div>
+        <button class="btn" id="conferirBtn">💎 Conferir</button>
+        <div id="resumoConferencia" style="margin-top:1rem;"></div>
+      `;
+
+      document.getElementById('conferirBtn').addEventListener('click', () => {
+        const resStr = document.getElementById('resultadoOficial').value.trim();
+        const jogosStr = document.getElementById('jogosConferir').value.trim();
+        if (!resStr || !jogosStr) return alert("Preencha todos os campos.");
+        const resultado = resStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+        if (resultado.length !== 15) return alert("Resultado deve ter 15 dezenas.");
+        const linhas = jogosStr.split('\n').filter(l => l.trim());
+        const jogos = linhas.map(l => l.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)));
+
+        const desdobramento = {
+          15: { fator: 1, faixas: { 15:1, 14:15, 13:105, 12:455, 11:1365 } },
+          16: { fator: 16, faixas: { 15:1, 14:16, 13:120, 12:560, 11:1820 } },
+          17: { fator: 136, faixas: { 15:1, 14:17, 13:136, 12:680, 11:2380 } },
+          18: { fator: 816, faixas: { 15:1, 14:18, 13:153, 12:816, 11:3060 } }
+        };
+
+        let t11=0, t12=0, t13=0, t14=0, t15=0, custo=0, retorno=0;
+
+        jogos.forEach(jogo => {
+          const acertos = jogo.filter(n => resultado.includes(n)).length;
+          const info = desdobramento[jogo.length];
+          if (!info) return;
+          custo += info.fator * 2.5;
+          if (acertos >= 11 && info.faixas[acertos]) {
+            const m = info.faixas[acertos];
+            if (acertos===15) { t15+=m; retorno+=m*1000000; }
+            else if (acertos===14) { t14+=m; retorno+=m*1500; }
+            else if (acertos===13) { t13+=m; retorno+=m*30; }
+            else if (acertos===12) { t12+=m; retorno+=m*6; }
+            else if (acertos===11) { t11+=m; retorno+=m*3; }
+          }
+        });
+
+        const lucro = retorno - custo;
+        document.getElementById('resumoConferencia').innerHTML = `
+          <div class="result-card" style="background:rgba(0,0,0,0.3);">
+            <h4>🏆 Resumo</h4>
+            <p>15 acertos: <strong>${t15}</strong> | 14: <strong>${t14}</strong> | 13: <strong>${t13}</strong> | 12: <strong>${t12}</strong> | 11: <strong>${t11}</strong></p>
+            <p>💰 Custo: <strong>R$ ${custo.toFixed(2)}</strong> | Retorno: <strong>R$ ${retorno.toFixed(2)}</strong></p>
+            <p style="font-size:1.3rem; font-weight:800; color:${lucro>0?'#10b981':'#ef4444'};">📊 ${lucro>0?'LUCRO':'PREJUÍZO'}: R$ ${lucro.toFixed(2)}</p>
+          </div>
+        `;
+      });
+    }
+
+    // ==================== INICIALIZAÇÃO ====================
+    console.log("🎱 Loterial Pro pronto. Aguardando autenticação...");
+    authUI.style.display = 'block';
+    renderAuth();
+  </script>
 </body>
 </html>
