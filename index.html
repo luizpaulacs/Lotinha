@@ -86,7 +86,6 @@
       z-index: 1;
     }
 
-    /* Cards modernos com vidro */
     .card {
       background: var(--glass);
       backdrop-filter: blur(20px);
@@ -114,7 +113,6 @@
       box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.12);
     }
 
-    /* Header elegante */
     .header-row {
       display: flex;
       justify-content: space-between;
@@ -185,7 +183,6 @@
       font-size: 1.2rem;
     }
 
-    /* Botões elegantes */
     .btn {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       border: none;
@@ -242,7 +239,6 @@
       font-size: 0.8rem;
     }
 
-    /* Tabs modernas */
     .tab-nav {
       display: flex;
       flex-wrap: wrap;
@@ -297,14 +293,12 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Grid responsivo */
     .grid-responsive {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
       gap: clamp(0.75rem, 2vw, 1.25rem);
     }
 
-    /* Inputs modernos */
     .input-group {
       margin-bottom: 0.8rem;
     }
@@ -344,7 +338,6 @@
       color: #1a202c;
     }
 
-    /* Dezenas estilizadas */
     .dezena-circle {
       display: inline-flex;
       align-items: center;
@@ -367,7 +360,6 @@
       border-color: var(--primary-light);
     }
 
-    /* Badges */
     .badge {
       display: inline-block;
       padding: 0.3rem 0.8rem;
@@ -383,7 +375,6 @@
     .badge-regular { background: linear-gradient(135deg, #f59e0b, #d97706); color: #1a202c; }
     .badge-ruim { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
 
-    /* Tabela moderna */
     .table-wrapper {
       overflow-x: auto;
       border-radius: var(--radius-md);
@@ -416,7 +407,6 @@
       background: rgba(255, 255, 255, 0.02);
     }
 
-    /* Seção de resultados */
     .result-card {
       background: rgba(0, 0, 0, 0.2);
       border-radius: var(--radius-lg);
@@ -433,7 +423,6 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* Scrollbar personalizada */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -446,7 +435,6 @@
       border-radius: 3px;
     }
 
-    /* Responsividade mobile */
     @media (max-width: 768px) {
       .header-row {
         flex-direction: column;
@@ -542,6 +530,9 @@
     const authUI = document.getElementById('authUI');
     const mainUI = document.getElementById('mainUI');
 
+    // CONSTANTE: Email do administrador (única pessoa que pode gerenciar licenças)
+    const ADMIN_EMAIL = "admin@loterialpro.com";
+    
     let currentUser = null;
     let isAdmin = false;
     let userDocData = null;
@@ -569,6 +560,9 @@
                 <button class="btn" id="btnLogin" style="flex:1;">🔐 Entrar</button>
                 <button class="btn btn-outline" id="btnCadastrar" style="flex:1;">✨ Criar Conta</button>
               </div>
+              <p style="text-align:center; margin-top:1rem; font-size:0.75rem; color:var(--text-muted);">
+                Admin: ${ADMIN_EMAIL}
+              </p>
             </div>
           </div>
         </div>
@@ -589,13 +583,16 @@
         const email = document.getElementById('authEmail').value.trim();
         const senha = document.getElementById('authSenha').value;
         if (!email || !senha) return alert("Preencha todos os campos.");
+        if (email === ADMIN_EMAIL) return alert("❌ Não é permitido criar conta com o email do administrador.");
         try {
           const cred = await createUserWithEmailAndPassword(auth, email, senha);
+          // Salva o documento do usuário COMUM
           await setDoc(doc(db, "usuarios", cred.user.uid), {
             email: email,
             status_licenca: "pendente",
             data_cadastro: new Date(),
-            dias_trial: 7
+            dias_trial: 7,
+            role: "usuario"
           });
           alert("✅ Conta criada! Trial de 7 dias ativado.");
         } catch (e) {
@@ -604,7 +601,7 @@
       });
     }
 
-    // ==================== VERIFICAÇÃO DE ACESSO ====================
+    // ==================== VERIFICAÇÃO DE ACESSO (CORRIGIDA) ====================
     async function verificarAcesso(user) {
       if (!user) {
         mainUI.style.display = 'none';
@@ -617,25 +614,52 @@
       mainUI.style.display = 'block';
       currentUser = user;
 
-      try {
-        await getDocs(collection(db, "usuarios"));
+      // Verificação CORRETA de admin: APENAS pelo email cadastrado
+      if (user.email === ADMIN_EMAIL) {
         isAdmin = true;
-        userDocData = { status_licenca: "ativo" };
-        console.log("👑 Admin identificado");
+        userDocData = { status_licenca: "ativo", role: "admin" };
+        console.log("👑 Admin autenticado:", user.email);
+        
+        // Garante que o documento do admin existe no Firestore
+        try {
+          const adminDoc = await getDoc(doc(db, "usuarios", user.uid));
+          if (!adminDoc.exists()) {
+            await setDoc(doc(db, "usuarios", user.uid), {
+              email: user.email,
+              status_licenca: "ativo",
+              data_cadastro: new Date(),
+              dias_trial: 999,
+              role: "admin"
+            });
+          }
+        } catch (e) {
+          console.log("Admin doc verification:", e.message);
+        }
+        
         construirInterface();
         return;
-      } catch (e) {
-        isAdmin = false;
       }
 
+      // Para usuários NORMAIS
+      isAdmin = false;
+      
       try {
         const userDoc = await getDoc(doc(db, "usuarios", user.uid));
         if (!userDoc.exists()) {
-          alert("Documento não encontrado. Contate o suporte.");
+          alert("Documento de usuário não encontrado. Contate o suporte.");
           await signOut(auth);
           return;
         }
+        
         userDocData = userDoc.data();
+        console.log("👤 Usuário comum:", user.email, "Status:", userDocData.status_licenca);
+
+        // Verificação adicional de segurança: se o doc tem role admin mas não é o email admin
+        if (userDocData.role === "admin" && user.email !== ADMIN_EMAIL) {
+          alert("🚫 Configuração inválida detectada. Contate o suporte.");
+          await signOut(auth);
+          return;
+        }
 
         if (userDocData.status_licenca === "ativo") {
           construirInterface();
@@ -652,18 +676,18 @@
             await signOut(auth);
           }
         } else if (userDocData.status_licenca === "bloqueado") {
-          alert("🚫 Licença bloqueada.");
+          alert("🚫 Sua licença foi bloqueada. Contate o administrador.");
           await signOut(auth);
         }
       } catch (e) {
-        console.error(e);
-        alert("Erro ao verificar acesso.");
+        console.error("Erro ao verificar documento do usuário:", e);
+        alert("❌ Erro ao verificar acesso: " + e.message);
         await signOut(auth);
       }
     }
 
     onAuthStateChanged(auth, (user) => {
-      console.log("Auth state:", user?.email || "Nenhum");
+      console.log("Auth state changed:", user?.email || "Nenhum usuário");
       verificarAcesso(user);
     });
 
@@ -675,11 +699,11 @@
             <span class="logo-icon">🎱</span>
             <div>
               <div class="logo-text">Loterial Pro</div>
-              <div class="logo-sub">Sistema Cloud Comercial</div>
+              <div class="logo-sub">Sistema Cloud Comercial ${isAdmin ? '· ADMIN' : ''}</div>
             </div>
           </div>
           <div class="header-actions">
-            <span class="user-pill">👤 ${currentUser?.email || ''}</span>
+            <span class="user-pill">👤 ${currentUser?.email || ''} ${isAdmin ? '👑' : ''}</span>
             <button class="btn btn-icon btn-outline" id="themeToggle" title="Alternar tema">🌓</button>
             <button class="btn btn-outline btn-sm" id="btnLogout">🚪 Sair</button>
           </div>
@@ -738,27 +762,46 @@
       }
     }
 
-    // ==================== ABA LICENÇAS ====================
+    // ==================== ABA LICENÇAS (SOMENTE ADMIN) ====================
     async function renderLicencas() {
       const container = document.getElementById('tab-licencas');
+      
+      // Verificação dupla de segurança
+      if (!isAdmin || currentUser?.email !== ADMIN_EMAIL) {
+        container.innerHTML = '<p style="text-align:center; padding:2rem;">🚫 Acesso não autorizado.</p>';
+        return;
+      }
+      
       container.innerHTML = '<p style="text-align:center; padding:2rem;">⏳ Carregando licenças...</p>';
+      
       try {
         const snap = await getDocs(collection(db, "usuarios"));
         const users = [];
-        snap.forEach(d => users.push({ id: d.id, ...d.data() }));
+        snap.forEach(d => {
+          const data = d.data();
+          // Não mostra o próprio admin na lista de gerenciamento
+          if (data.email !== ADMIN_EMAIL) {
+            users.push({ id: d.id, ...data });
+          }
+        });
+        
         container.innerHTML = `
-          <h3 style="margin-bottom:1rem;">🛡️ Gerenciar Licenças</h3>
+          <h3 style="margin-bottom:1rem;">🛡️ Gerenciar Licenças de Usuários</h3>
+          <p style="color: var(--text-muted); margin-bottom:1rem; font-size:0.85rem;">
+            👑 Logado como Administrador: <strong>${ADMIN_EMAIL}</strong>
+          </p>
           <div class="table-wrapper">
             <table>
               <thead><tr><th>Email</th><th>Status</th><th style="text-align:center;">Ações</th></tr></thead>
               <tbody>
-                ${users.map(u => `
+                ${users.length === 0 ? '<tr><td colspan="3" style="text-align:center;">Nenhum usuário cadastrado.</td></tr>' : 
+                users.map(u => `
                   <tr>
                     <td>${u.email}</td>
-                    <td><span style="text-transform:uppercase; font-weight:600; color:${u.status_licenca==='ativo'?'#10b981':'#f59e0b'};">${u.status_licenca}</span></td>
+                    <td><span style="text-transform:uppercase; font-weight:600; color:${u.status_licenca==='ativo'?'#10b981':u.status_licenca==='pendente'?'#f59e0b':'#ef4444'};">${u.status_licenca}</span></td>
                     <td style="text-align:center;">
-                      <button class="btn btn-success btn-sm ativar" data-id="${u.id}">✅ Ativar</button>
-                      <button class="btn btn-danger btn-sm bloquear" data-id="${u.id}">🚫 Bloquear</button>
+                      <button class="btn btn-success btn-sm ativar" data-id="${u.id}" ${u.status_licenca==='ativo'?'disabled':''}>✅ Ativar</button>
+                      <button class="btn btn-danger btn-sm bloquear" data-id="${u.id}" ${u.status_licenca==='bloqueado'?'disabled':''}>🚫 Bloquear</button>
                     </td>
                   </tr>
                 `).join('')}
@@ -766,34 +809,47 @@
             </table>
           </div>
         `;
+        
         container.querySelectorAll('.ativar').forEach(b => b.addEventListener('click', async (e) => {
+          if (!isAdmin) return alert("🚫 Ação não autorizada.");
           await updateDoc(doc(db, "usuarios", e.target.dataset.id), { status_licenca: "ativo" });
           renderLicencas();
         }));
+        
         container.querySelectorAll('.bloquear').forEach(b => b.addEventListener('click', async (e) => {
+          if (!isAdmin) return alert("🚫 Ação não autorizada.");
           await updateDoc(doc(db, "usuarios", e.target.dataset.id), { status_licenca: "bloqueado" });
           renderLicencas();
         }));
+        
       } catch (e) {
-        container.innerHTML = '<p>❌ Erro ao carregar licenças.</p>';
+        console.error("Erro ao carregar licenças:", e);
+        container.innerHTML = '<p style="text-align:center; padding:2rem;">❌ Erro ao carregar licenças. Verifique as permissões.</p>';
       }
     }
 
-    // ==================== ABA CONCURSOS ====================
+    // ==================== ABA CONCURSOS (SOMENTE ADMIN) ====================
     async function carregarConcursos() {
+      if (!isAdmin) return;
       try {
         const q = query(collection(db, "concursos"), orderBy("numero", "desc"), limit(50));
         const snap = await getDocs(q);
         allConcursosCache = [];
         snap.forEach(d => allConcursosCache.push(d.data()));
       } catch (e) {
-        console.error(e);
+        console.error("Erro ao carregar concursos:", e);
       }
     }
 
     async function renderConcursos() {
-      await carregarConcursos();
       const container = document.getElementById('tab-concursos');
+      
+      if (!isAdmin) {
+        container.innerHTML = '<p style="text-align:center; padding:2rem;">🚫 Acesso restrito ao administrador.</p>';
+        return;
+      }
+      
+      await carregarConcursos();
       container.innerHTML = `
         <h3 style="margin-bottom:1rem;">📋 Cadastrar Novo Concurso</h3>
         <div class="grid-responsive">
@@ -813,6 +869,7 @@
       `;
 
       document.getElementById('salvarConcurso').addEventListener('click', async () => {
+        if (!isAdmin) return alert("🚫 Ação não autorizada.");
         const num = document.getElementById('numConcurso').value.trim();
         const data = document.getElementById('dataConcurso').value;
         const dezenasStr = document.getElementById('dezenasConcurso').value;
@@ -955,7 +1012,17 @@
         if (!texto) return alert("Insira jogos.");
         const linhas = texto.split('\n').filter(l => l.trim());
         const jogos = linhas.map(l => l.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)));
-        await carregarConcursos();
+        
+        // Carrega concursos para análise (disponível para todos)
+        try {
+          const q = query(collection(db, "concursos"), orderBy("numero", "desc"), limit(1));
+          const snap = await getDocs(q);
+          allConcursosCache = [];
+          snap.forEach(d => allConcursosCache.push(d.data()));
+        } catch (e) {
+          console.log("Não foi possível carregar concursos para análise:", e.message);
+        }
+        
         const ultimo = allConcursosCache.length > 0 ? allConcursosCache[0] : null;
 
         let html = '';
@@ -1043,7 +1110,7 @@
     }
 
     // ==================== INICIALIZAÇÃO ====================
-    console.log("🎱 Loterial Pro pronto. Aguardando autenticação...");
+    console.log("🎱 Loterial Pro pronto. Admin:", ADMIN_EMAIL);
     authUI.style.display = 'block';
     renderAuth();
   </script>
